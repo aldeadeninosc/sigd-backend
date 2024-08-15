@@ -101,10 +101,11 @@ class DocumentsModelController extends Controller
 
 
             $file = $request->file('document_content');
-            $date = now()->format('dmy-His');
 
-            
-            $documentName = $subfolder->subfolder_name.' '.$date;
+            //$date = now()->format('dmy-His');
+            //$documentName = $subfolder->subfolder_name.' '.$date;
+
+            $documentName = $request->input('document_name'); // Obtener el nombre del documento desde la solicitud
             $documentExtension = $file->getClientOriginalExtension();
             
             $documentPath = $folderPath . '/' . $documentName.'.'.$documentExtension;

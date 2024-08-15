@@ -23,6 +23,7 @@ class DocumentsModelRequest extends FormRequest
     {
         return [
             'document_content' => 'required|file',
+            'document_name' => 'required|string|max:255', // Validar el nombre del documento
             'id_user' => 'required|exists:users,id',
             'id_subfolder' => 'required|exists:sub_folder_models,id',
         ];
@@ -32,6 +33,7 @@ class DocumentsModelRequest extends FormRequest
     {
         return [
             'document_content.required' => 'El contenido del documento es requerido.',
+            'document_name.required' => 'El nombre del documento es requerido.', // Mensaje de error personalizado
             'id_user.required' => 'El ID de usuario es requerido.',
             'id_user.exists' => 'El usuario especificado no existe en la base de datos.',
             'id_subfolder.required' => 'El ID de la subcarpeta es requerido.',
