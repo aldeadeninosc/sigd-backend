@@ -74,6 +74,50 @@ class DocumentsModelController extends Controller
         return response()->json($response);
     }
 
+    /**
+     * Customized search method
+     */
+    public function searchDocuments(Request $request)
+    {
+        $childName = $request->input('child_name'); // Nombre del niño (carpeta principal)
+        $subfolderName = $request->input('subfolder_name'); // Nombre de la subcarpeta
+        $documentName = $request->input('document_name'); // Nombre del documento
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        // Buscar la carpeta principal (nombre del niño)
+        $folder = FolderModel::where('folder_name', 'like', '%' . $childName . '%')->first();
+        if (!$folder) {
+            return response()->json(['error' => 'No se encontró la carpeta del niño'], 404);
+        }
+
+        // Buscar la subcarpeta
+        $subfolder = SubFolderModel::where('subfolder_name', 'like', '%' . $subfolderName . '%')
+                                    ->where('id_folder', $folder->id)
+                                    ->first();
+        if (!$subfolder) {
+            return response()->json(['error' => 'No se encontró la subcarpeta'], 404);
+        }
+
+        // Buscar los documentos en la subcarpeta
+        $query = DocumentsModel::where('id_subfolder', $subfolder->id);
+
+        if ($documentName) {
+            $query->where('document_name', 'like', '%' . $documentName . '%');
+        }
+
+        $documents = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $response = [
+            'items' => $documents->items(),
+            'page' => $documents->currentPage(),
+            'per_page' => $documents->perPage(),
+            'totalCounts' => $documents->total(),
+        ];
+
+        return response()->json($response);
+    }
+
 
     /**
      * Store a newly created resource in storage.

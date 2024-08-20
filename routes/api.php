@@ -29,5 +29,5 @@ Route::group([ 'middleware' => JwtMiddleware::class], function () {
     Route::apiResource('/subfolder', SubFolderModelController::class);
     Route::apiResource('/documents', DocumentsModelController::class);
     Route::post('/documents/{id}', [DocumentsModelController::class, 'update'])->name('documents.update');
-
+    Route::post('/search-documents', [DocumentsModelController::class, 'searchDocuments'])->middleware(JwtMiddleware::class);
 });
