@@ -17,62 +17,62 @@ class DocumentsModelController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index(Request $request)
-{
-    $perPage = $request->input('per_page', 10);
-    $page = $request->input('page', 1);
-    $subfolderId = $request->input('subfolder_id');
-    $type = $request->input('type_file');
-    $dateAsc = $request->input('date_asc');
-    $dateDesc = $request->input('date_desc');
-    $nameAsc = $request->input('name_asc');
-    $nameDesc = $request->input('name_desc');
-    $q = $request->input('q');
+    public function index(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+        $subfolderId = $request->input('subfolder_id');
+        $type = $request->input('type_file');
+        $dateAsc = $request->input('date_asc');
+        $dateDesc = $request->input('date_desc');
+        $nameAsc = $request->input('name_asc');
+        $nameDesc = $request->input('name_desc');
+        $q = $request->input('q');
 
-    $query = DocumentsModel::query();
+        $query = DocumentsModel::query();
 
-    if ($subfolderId) {
-        $query->where('id_subfolder', $subfolderId);
+        if ($subfolderId) {
+            $query->where('id_subfolder', $subfolderId);
+        }
+
+        if ($q) {
+            $query->where(function ($subQuery) use ($q) {
+                $subQuery->where('document_name', 'like', '%' . $q . '%')
+                    ->orWhere('document_type', 'like', '%' . $q . '%');
+            });
+        }
+
+        if ($type) {
+            $query->where('document_type', $type);
+        }
+
+        if ($dateAsc) {
+            $query->orderBy('created_at', 'asc');
+        }
+
+        if ($dateDesc) {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        if ($nameAsc) {
+            $query->orderBy('document_name', 'asc');
+        }
+
+        if ($nameDesc) {
+            $query->orderBy('document_name', 'desc');
+        }
+
+        $documents = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $response = [
+            'items' => $documents->items(),
+            'page' => $documents->currentPage(),
+            'per_page' => $documents->perPage(),
+            'totalCounts' => $documents->total(),
+        ];
+
+        return response()->json($response);
     }
-
-    if ($q) {
-        $query->where(function ($subQuery) use ($q) {
-            $subQuery->where('document_name', 'like', '%' . $q . '%')
-                ->orWhere('document_type', 'like', '%' . $q . '%');
-        });
-    }
-
-    if ($type) {
-        $query->where('document_type', $type);
-    }
-
-    if ($dateAsc) {
-        $query->orderBy('created_at', 'asc');
-    }
-
-    if ($dateDesc) {
-        $query->orderBy('created_at', 'desc');
-    }
-
-    if ($nameAsc) {
-        $query->orderBy('document_name', 'asc');
-    }
-
-    if ($nameDesc) {
-        $query->orderBy('document_name', 'desc');
-    }
-
-    $documents = $query->paginate($perPage, ['*'], 'page', $page);
-
-    $response = [
-        'items' => $documents->items(),
-        'page' => $documents->currentPage(),
-        'per_page' => $documents->perPage(),
-        'totalCounts' => $documents->total(),
-    ];
-
-    return response()->json($response);
-}
 
 
     /**
