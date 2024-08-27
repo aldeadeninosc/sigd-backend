@@ -9,6 +9,7 @@ use App\Models\SubFolderModel;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 
@@ -79,11 +80,25 @@ class DocumentsModelController extends Controller
      */
     public function searchDocuments(Request $request)
     {
-        $childName = $request->input('child_name'); // Nombre del niño (carpeta principal)
-        $subfolderName = $request->input('subfolder_name'); // Nombre de la subcarpeta
-        $documentName = $request->input('document_name'); // Nombre del documento
+        $query = $request->input('query'); // La consulta de búsqueda proporcionada por el usuario
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
+
+        // Realizar la llamada a la API Flask para obtener las etiquetas predichas
+        $response = Http::get('http://31.220.52.1:4000/predict', [
+            'query' => $query
+        ]);
+
+        // Comprobar si la llamada a la API Flask fue exitosa
+        if ($response->failed()) {
+            return response()->json(['error' => 'Error al conectar con el servicio de predicción'], 500);
+        }
+
+        // Obtener las etiquetas predichas de la respuesta de la API Flask
+        $predictions = $response->json();
+        $childName = $predictions['carpeta'];
+        $subfolderName = $predictions['subcarpeta'];
+        $documentName = $predictions['documento'];
 
         // Buscar la carpeta principal (nombre del niño)
         $folder = FolderModel::where('folder_name', 'like', '%' . $childName . '%')->first();
