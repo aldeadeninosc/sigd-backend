@@ -20,8 +20,6 @@ Route::group([
     Route::get('/getCurrentUser', [AuthController::class, 'getCurrentUser'])->name('getCurrentUser')->middleware(JwtMiddleware::class);
     Route::post('/updateUser/{id}', [AuthController::class, 'updateUser'])->name('updateUser')->middleware(JwtMiddleware::class);
     Route::delete('/deleteUser/{id}', [AuthController::class, 'deleteUser'])->name('deleteUser')->middleware(JwtMiddleware::class);
-
-
 });
 
 Route::group([ 'middleware' => JwtMiddleware::class], function () {
